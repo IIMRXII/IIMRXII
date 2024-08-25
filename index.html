@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кликер</title>
+</head>
+<body>
+    <h1>Управление монетами</h1>
+    <div>
+        <button id="coinButton">Добавить монету</button>
+    </div>
+    <div id="coinCount">У тебя 0 монет!</div>
+
+    <script>
+        let coinCount = 0;
+        const userId = localStorage.getItem('userId') || 'user_' + Math.random().toString(36).substr(2, 9);
+        
+        // Сохраняем уникальный userId в localStorage
+        localStorage.setItem('userId', userId);
+
+        // Получение количества монет
+        function getCoins() {
+            fetch(`/coins/${userId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Ошибка загрузки количества монет');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    coinCount = data.coins;
+                    document.getElementById('coinCount').innerText = `У тебя ${coinCount} монет!`;
+                })
+                .catch(error => {
+                    console.error('Ошибка при получении количества монет:', error);
+                });
+        }
+
+        // Обработчик клика на кнопку
+        document.getElementById('coinButton').onclick = function() {
+            coinCount++;
+            document.getElementById('coinCount').innerText = `У тебя ${coinCount} монет!`;
+
+            fetch('/coins', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ userId })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Ошибка обновления количества монет');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Монеты обновлены на сервере:', data);
+            })
+            .catch(error => {
+                console.error('Ошибка при обновлении монет на сервере:', error);
+            });
+        };
+
+        // Получаем количество монет при загрузке страницы
+        window.onload = function() {
+            getCoins();
+        };
+    </script>
+</body>
+</html>
