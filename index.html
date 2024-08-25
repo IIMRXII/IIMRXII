@@ -50,6 +50,7 @@
         let coinCount = parseInt(localStorage.getItem('coinCount')) || 0; // Загружаем количество монет
         let coinsPerClick = parseInt(localStorage.getItem('coinsPerClick')) || 1; // Загружаем монеты за клик
         let upgradeCost = parseInt(localStorage.getItem('upgradeCost')) || 10; // Загружаем стоимость улучшения
+        let totalClicks = parseInt(localStorage.getItem('totalClicks')) || 0; // Загружаем общее количество кликов
         const userId = localStorage.getItem('userId') || 'user_' + Math.random().toString(36).substr(2, 9);
         localStorage.setItem('userId', userId);
 
@@ -79,7 +80,9 @@
 
         document.getElementById('coinImage').onclick = function() {
             coinCount += coinsPerClick; // Добавляем коин на основе coinsPerClick
+            totalClicks++; // Увеличиваем общее количество кликов
             localStorage.setItem('coinCount', coinCount); // Сохраняем количество монет в localStorage
+            localStorage.setItem('totalClicks', totalClicks); // Сохраняем общее количество кликов
             updateUI();
 
             fetch('/coins', {
@@ -109,11 +112,12 @@
                 coinCount -= upgradeCost; // Тратим нужное количество монет
                 coinsPerClick++; // Увеличиваем монеты за клик
                 upgradeCost *= 2; // Увеличиваем стоимость улучшения
-
+                
                 // Сохраняем обновленные данные
                 localStorage.setItem('coinCount', coinCount);
                 localStorage.setItem('coinsPerClick', coinsPerClick);
                 localStorage.setItem('upgradeCost', upgradeCost);
+                localStorage.setItem('totalClicks', totalClicks); // Перезаписываем количество кликов
 
                 updateUI();
             } else {
