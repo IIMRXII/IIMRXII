@@ -56,7 +56,7 @@
         let upgradeCost = parseInt(localStorage.getItem('upgradeCost')) || 10;
         let autoClickerCost = 50; // Стоимость автокликера
         let autoClickerActive = JSON.parse(localStorage.getItem('autoClickerActive')) || false; // Статус автокликера
-        let autoClickerInterval; // Переменная для хранения интервала автокликера
+        let autoClickerStartTime = parseInt(localStorage.getItem('autoClickerStartTime')) || 0; // Время активации автокликера
         const userId = localStorage.getItem('userId') || 'user_' + Math.random().toString(36).substr(2, 9);
         localStorage.setItem('userId', userId);
 
@@ -94,15 +94,10 @@
                 coinCount -= autoClickerCost;
                 autoClickerActive = true; // Включаем автокликер
 
+                autoClickerStartTime = Math.floor(Date.now() / 1000); // Записываем текущее время
                 localStorage.setItem('coinCount', coinCount);
                 localStorage.setItem('autoClickerActive', autoClickerActive);
-
-                // Начинаем интервал автокликера
-                autoClickerInterval = setInterval(function() {
-                    coinCount += 1; // Генерируем 1 монету
-                    localStorage.setItem('coinCount', coinCount);
-                    updateUI();
-                }, 1000); // Каждую секунду
+                localStorage.setItem('autoClickerStartTime', autoClickerStartTime);
 
                 updateUI();
             } else if (autoClickerActive) {
@@ -112,16 +107,23 @@
             }
         };
 
-        // Проверяем состояние автокликера при загрузке страницы
-        if (autoClickerActive) {
-            autoClickerInterval = setInterval(function() {
-                coinCount += 1; // Генерируем 1 монету
-                localStorage.setItem('coinCount', coinCount);
-                updateUI();
-            }, 1000);
-        }
-
+        // При загрузке страницы
         window.onload = function() {
+            // Проверяем состояние автокликера
+            if (autoClickerActive) {
+                let currentTime = Math.floor(Date.now() / 1000);
+                let elapsedTime = currentTime - autoClickerStartTime; // Промежуток времени с активации
+
+                coinCount += elapsedTime; // Добавляем "заработанные" монеты
+                localStorage.setItem('coinCount', coinCount);
+
+                // Начинаем новый автокликер
+                setInterval(function() {
+                    coinCount += 1; // Генерируем 1 монету каждую секунду
+                    localStorage.setItem('coinCount', coinCount);
+                    updateUI();
+                }, 1000);
+            }
             updateUI();
         };
     </script>
