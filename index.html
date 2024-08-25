@@ -101,7 +101,8 @@
                 localStorage.setItem('autoClickerActive', autoClickerActive);
                 localStorage.setItem('autoClickerStartTime', autoClickerStartTime);
                 
-                startAutoClicker(); // Запускаем автокликер
+                // Запускаем автокликер
+                startAutoClicker(); 
                 updateUI();
             } else if (autoClickerActive) {
                 alert("Автокликер уже активен!");
@@ -110,30 +111,29 @@
             }
         };
 
-        // Функция для запуска автокликера
         function startAutoClicker() {
             setInterval(function() {
                 coinCount += 1; // Генерируем 1 монету каждую секунду
                 localStorage.setItem('coinCount', coinCount);
-                lastUpdateTime = Math.floor(Date.now() / 1000); // Обновляем время последнего изменения
                 updateUI();
             }, 1000);
         }
 
-        // При загрузке страницы
         window.onload = function() {
-            // Если автокликер активен, добавим "заработанные" монеты
+            // Добавим "заработанные" монеты, если автокликер активен
             if (autoClickerActive) {
                 let currentTime = Math.floor(Date.now() / 1000);
                 let elapsedTime = currentTime - autoClickerStartTime; // Промежуток времени с активации
 
-                // Добавляем "заработанные" монеты, но не запускаем автокликер еще раз
-                coinCount += elapsedTime; // Добавляем заработанные за время монеты
+                coinCount += elapsedTime; // Добавляем "заработанные" монеты
                 localStorage.setItem('coinCount', coinCount);
 
-                // Сбросим время активации, чтобы избежать повторного начисления
+                // Обновляем время начала автокликера
                 autoClickerStartTime = currentTime;
                 localStorage.setItem('autoClickerStartTime', autoClickerStartTime);
+                
+                // Запускаем автокликер
+                startAutoClicker(); 
             }
             updateUI();
         };
