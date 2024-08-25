@@ -50,7 +50,6 @@
         let coinCount = parseInt(localStorage.getItem('coinCount')) || 0; // Загружаем количество монет
         let coinsPerClick = parseInt(localStorage.getItem('coinsPerClick')) || 1; // Загружаем монеты за клик
         let upgradeCost = parseInt(localStorage.getItem('upgradeCost')) || 10; // Загружаем стоимость улучшения
-        let totalClicks = parseInt(localStorage.getItem('totalClicks')) || 0; // Загружаем общее количество кликов
         const userId = localStorage.getItem('userId') || 'user_' + Math.random().toString(36).substr(2, 9);
         localStorage.setItem('userId', userId);
 
@@ -60,50 +59,11 @@
             document.getElementById('upgradeButton').innerText = `Купить улучшение (${upgradeCost} монет)`; // Обновляем текст кнопки
         }
 
-        function getCoins() {
-            fetch(`/coins/${userId}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Ошибка загрузки количества монет');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    coinCount = data.coins;
-                    localStorage.setItem('coinCount', coinCount); // Сохраняем новые данные
-                    updateUI();
-                })
-                .catch(error => {
-                    console.error('Ошибка при получении количества монет:', error);
-                });
-        }
-
+        // Вызывается, когда пользователь кликает по изображению
         document.getElementById('coinImage').onclick = function() {
             coinCount += coinsPerClick; // Добавляем коин на основе coinsPerClick
-            totalClicks++; // Увеличиваем общее количество кликов
             localStorage.setItem('coinCount', coinCount); // Сохраняем количество монет в localStorage
-            localStorage.setItem('totalClicks', totalClicks); // Сохраняем общее количество кликов
             updateUI();
-
-            fetch('/coins', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ userId })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Ошибка обновления количества монет');
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Монеты обновлены на сервере:', data);
-            })
-            .catch(error => {
-                console.error('Ошибка при обновлении монет на сервере:', error);
-            });
         };
 
         // Обработчик клика по улучшению
@@ -115,9 +75,9 @@
                 
                 // Сохраняем обновленные данные
                 localStorage.setItem('coinCount', coinCount);
-                localStorage.setItem('coinsPerClick', coinsPerClick);
+                localStorage.setItem('coinsPerCl
+ick', coinsPerClick);
                 localStorage.setItem('upgradeCost', upgradeCost);
-                localStorage.setItem('totalClicks', totalClicks); // Перезаписываем количество кликов
 
                 updateUI();
             } else {
@@ -127,7 +87,7 @@
 
         window.onload = function() {
             updateUI(); // Обновляем интерфейс при загрузке
-            getCoins(); // Получаем количество монет с сервера
+            // Здесь можно получить данные с сервера только для итераций, если это необходимо
         };
     </script>
 </body>
