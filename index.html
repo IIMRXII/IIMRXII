@@ -45,35 +45,40 @@
         <button id="upgradeButton">Купить улучшение (10 монет)</button>
         <div id="upgradeCount">Монеты за клик: 1</div>
     </div>
+    <div id="autoClickerSection">
+        <button id="autoClickerButton">Купить автокликер (50 монет)</button>
+        <div id="autoClickerInfo">Автокликер приносит 1 монету каждую секунду.</div>
+    </div>
 
     <script>
-        let coinCount = parseInt(localStorage.getItem('coinCount')) || 0; // Загружаем количество монет
-        let coinsPerClick = parseInt(localStorage.getItem('coinsPerClick')) || 1; // Загружаем монеты за клик
-        let upgradeCost = parseInt(localStorage.getItem('upgradeCost')) || 10; // Загружаем стоимость улучшения
+        let coinCount = parseInt(localStorage.getItem('coinCount')) || 0;
+        let coinsPerClick = parseInt(localStorage.getItem('coinsPerClick')) || 1;
+        let upgradeCost = parseInt(localStorage.getItem('upgradeCost')) || 10;
+        let autoClickerCost = 50; // Стоимость автокликера
+        let autoClickerActive = JSON.parse(localStorage.getItem('autoClickerActive')) || false; // Статус автокликера
+        let autoClickerInterval; // Переменная для хранения интервала автокликера
         const userId = localStorage.getItem('userId') || 'user_' + Math.random().toString(36).substr(2, 9);
         localStorage.setItem('userId', userId);
 
         function updateUI() {
             document.getElementById('coinCount').innerText = `У тебя ${coinCount} монет!`;
             document.getElementById('upgradeCount').innerText = `Монеты за клик: ${coinsPerClick}`;
-            document.getElementById('upgradeButton').innerText = `Купить улучшение (${upgradeCost} монет)`; // Обновляем текст кнопки
+            document.getElementById('upgradeButton').innerText = `Купить улучшение (${upgradeCost} монет)`;
+            document.getElementById('autoClickerButton').innerText = `Купить автокликер (${autoClickerCost} монет)`;
         }
 
-        // Вызывается, когда пользователь кликает по изображению
         document.getElementById('coinImage').onclick = function() {
-            coinCount += coinsPerClick; // Добавляем коин на основе coinsPerClick
-            localStorage.setItem('coinCount', coinCount); // Сохраняем количество монет в localStorage
+            coinCount += coinsPerClick;
+            localStorage.setItem('coinCount', coinCount);
             updateUI();
         };
 
-        // Обработчик клика по улучшению
         document.getElementById('upgradeButton').onclick = function() {
-            if (coinCount >= upgradeCost) { // Проверка на достаточно ли монет
-                coinCount -= upgradeCost; // Тратим нужное количество монет
-                coinsPerClick++; // Увеличиваем монеты за клик
-                upgradeCost *= 2; // Увеличиваем стоимость улучшения
-                
-                // Сохраняем обновленные данные
+            if (coinCount >= upgradeCost) {
+                coinCount -= upgradeCost;
+                coinsPerClick++;
+                upgradeCost *= 2;
+
                 localStorage.setItem('coinCount', coinCount);
                 localStorage.setItem('coinsPerClick', coinsPerClick);
                 localStorage.setItem('upgradeCost', upgradeCost);
@@ -84,9 +89,40 @@
             }
         };
 
+        document.getElementById('autoClickerButton').onclick = function() {
+            if (coinCount >= autoClickerCost && !autoClickerActive) {
+                coinCount -= autoClickerCost;
+                autoClickerActive = true; // Включаем автокликер
+
+                localStorage.setItem('coinCount', coinCount);
+                localStorage.setItem('autoClickerActive', autoClickerActive);
+
+                // Начинаем интервал автокликера
+                autoClickerInterval = setInterval(function() {
+                    coinCount += 1; // Генерируем 1 монету
+                    localStorage.setItem('coinCount', coinCount);
+                    updateUI();
+                }, 1000); // Каждую секунду
+
+                updateUI();
+            } else if (autoClickerActive) {
+                alert("Автокликер уже активен!");
+            } else {
+                alert("У тебя недостаточно монет для покупки автокликера!");
+            }
+        };
+
+        // Проверяем состояние автокликера при загрузке страницы
+        if (autoClickerActive) {
+            autoClickerInterval = setInterval(function() {
+                coinCount += 1; // Генерируем 1 монету
+                localStorage.setItem('coinCount', coinCount);
+                updateUI();
+            }, 1000);
+        }
+
         window.onload = function() {
-            updateUI(); // Обновляем интерфейс при загрузке
-            // Здесь можно получить данные с сервера только для итераций, если это необходимо
+            updateUI();
         };
     </script>
 </body>
