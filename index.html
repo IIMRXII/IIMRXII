@@ -47,11 +47,17 @@
     </div>
 
     <script>
-        let coinCount = 0;
-        let coinsPerClick = 1; // Количество монет за клик
-        let upgradeCost = 10; // Начальная стоимость улучшения
+        let coinCount = parseInt(localStorage.getItem('coinCount')) || 0; // Загружаем количество монет
+        let coinsPerClick = parseInt(localStorage.getItem('coinsPerClick')) || 1; // Загружаем монеты за клик
+        let upgradeCost = parseInt(localStorage.getItem('upgradeCost')) || 10; // Загружаем стоимость улучшения
         const userId = localStorage.getItem('userId') || 'user_' + Math.random().toString(36).substr(2, 9);
         localStorage.setItem('userId', userId);
+
+        function updateUI() {
+            document.getElementById('coinCount').innerText = `У тебя ${coinCount} монет!`;
+            document.getElementById('upgradeCount').innerText = `Монеты за клик: ${coinsPerClick}`;
+            document.getElementById('upgradeButton').innerText = `Купить улучшение (${upgradeCost} монет)`; // Обновляем текст кнопки
+        }
 
         function getCoins() {
             fetch(`/coins/${userId}`)
@@ -63,7 +69,8 @@
                 })
                 .then(data => {
                     coinCount = data.coins;
-                    document.getElementById('coinCount').innerText = `У тебя ${coinCount} монет!`;
+                    localStorage.setItem('coinCount', coinCount); // Сохраняем новые данные
+                    updateUI();
                 })
                 .catch(error => {
                     console.error('Ошибка при получении количества монет:', error);
@@ -72,7 +79,8 @@
 
         document.getElementById('coinImage').onclick = function() {
             coinCount += coinsPerClick; // Добавляем коин на основе coinsPerClick
-            document.getElementById('coinCount').innerText = `У тебя ${coinCount} монет!`;
+            localStorage.setItem('coinCount', coinCount); // Сохраняем количество монет в localStorage
+            updateUI();
 
             fetch('/coins', {
                 method: 'POST',
@@ -101,16 +109,21 @@
                 coinCount -= upgradeCost; // Тратим нужное количество монет
                 coinsPerClick++; // Увеличиваем монеты за клик
                 upgradeCost *= 2; // Увеличиваем стоимость улучшения
-                document.getElementById('coinCount').innerText = `У тебя ${coinCount} монет!`;
-                document.getElementById('upgradeCount').innerText = `Монеты за клик: ${coinsPerClick}`;
-                document.getElementById('upgradeButton').innerText = `Купить улучшение (${upgradeCost} монет)`; // Меняем текст кнопки
+
+                // Сохраняем обновленные данные
+                localStorage.setItem('coinCount', coinCount);
+                localStorage.setItem('coinsPerClick', coinsPerClick);
+                localStorage.setItem('upgradeCost', upgradeCost);
+
+                updateUI();
             } else {
                 alert("У тебя недостаточно монет для покупки улучшения!");
             }
         };
 
         window.onload = function() {
-            getCoins();
+            updateUI(); // Обновляем интерфейс при загрузке
+            getCoins(); // Получаем количество монет с сервера
         };
     </script>
 </body>
