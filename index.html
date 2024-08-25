@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, user-scalable=no">
     <title>Кликер</title>
     <style>
         body {
@@ -57,6 +57,8 @@
         let autoClickerCost = 50; // Стоимость автокликера
         let autoClickerActive = JSON.parse(localStorage.getItem('autoClickerActive')) || false; // Статус автокликера
         let autoClickerStartTime = parseInt(localStorage.getItem('autoClickerStartTime')) || 0; // Время активации автокликера
+        let autoClickerInterval; // Для хранения идентификатора интервала
+
         const userId = localStorage.getItem('userId') || 'user_' + Math.random().toString(36).substr(2, 9);
         localStorage.setItem('userId', userId);
 
@@ -99,6 +101,13 @@
                 localStorage.setItem('autoClickerActive', autoClickerActive);
                 localStorage.setItem('autoClickerStartTime', autoClickerStartTime);
 
+                // Запускаем автокликер
+                autoClickerInterval = setInterval(function() {
+                    coinCount += 1; // Генерируем 1 монету каждую секунду
+                    localStorage.setItem('coinCount', coinCount);
+                    updateUI();
+                }, 1000);
+
                 updateUI();
             } else if (autoClickerActive) {
                 alert("Автокликер уже активен!");
@@ -114,11 +123,12 @@
                 let currentTime = Math.floor(Date.now() / 1000);
                 let elapsedTime = currentTime - autoClickerStartTime; // Промежуток времени с активации
 
-                coinCount += elapsedTime; // Добавляем "заработанные" монеты
+                // Добавляем "заработанные" монеты, но не запускаем автокликер еще раз
+                coinCount += elapsedTime; // Добавляем заработанные за время монеты
                 localStorage.setItem('coinCount', coinCount);
 
-                // Начинаем новый автокликер
-                setInterval(function() {
+                // Запускаем интервал, если автокликер активен
+                autoClickerInterval = setInterval(function() {
                     coinCount += 1; // Генерируем 1 монету каждую секунду
                     localStorage.setItem('coinCount', coinCount);
                     updateUI();
