@@ -57,10 +57,10 @@
         let autoClickerCost = 50; // Стоимость автокликера
         let autoClickerActive = JSON.parse(localStorage.getItem('autoClickerActive')) || false; // Статус автокликера
         let autoClickerStartTime = parseInt(localStorage.getItem('autoClickerStartTime')) || 0; // Время активации автокликера
-        let autoClickerInterval; // Для хранения идентификатора интервала
-
         const userId = localStorage.getItem('userId') || 'user_' + Math.random().toString(36).substr(2, 9);
         localStorage.setItem('userId', userId);
+        
+        let lastUpdateTime = Math.floor(Date.now() / 1000); // Время последнего обновления coinCount
 
         function updateUI() {
             document.getElementById('coinCount').innerText = `У тебя ${coinCount} монет!`;
@@ -100,14 +100,8 @@
                 localStorage.setItem('coinCount', coinCount);
                 localStorage.setItem('autoClickerActive', autoClickerActive);
                 localStorage.setItem('autoClickerStartTime', autoClickerStartTime);
-
-                // Запускаем автокликер
-                autoClickerInterval = setInterval(function() {
-                    coinCount += 1; // Генерируем 1 монету каждую секунду
-                    localStorage.setItem('coinCount', coinCount);
-                    updateUI();
-                }, 1000);
-
+                
+                startAutoClicker(); // Запускаем автокликер
                 updateUI();
             } else if (autoClickerActive) {
                 alert("Автокликер уже активен!");
@@ -116,9 +110,19 @@
             }
         };
 
+        // Функция для запуска автокликера
+        function startAutoClicker() {
+            setInterval(function() {
+                coinCount += 1; // Генерируем 1 монету каждую секунду
+                localStorage.setItem('coinCount', coinCount);
+                lastUpdateTime = Math.floor(Date.now() / 1000); // Обновляем время последнего изменения
+                updateUI();
+            }, 1000);
+        }
+
         // При загрузке страницы
         window.onload = function() {
-            // Проверяем состояние автокликера
+            // Если автокликер активен, добавим "заработанные" монеты
             if (autoClickerActive) {
                 let currentTime = Math.floor(Date.now() / 1000);
                 let elapsedTime = currentTime - autoClickerStartTime; // Промежуток времени с активации
@@ -127,12 +131,9 @@
                 coinCount += elapsedTime; // Добавляем заработанные за время монеты
                 localStorage.setItem('coinCount', coinCount);
 
-                // Запускаем интервал, если автокликер активен
-                autoClickerInterval = setInterval(function() {
-                    coinCount += 1; // Генерируем 1 монету каждую секунду
-                    localStorage.setItem('coinCount', coinCount);
-                    updateUI();
-                }, 1000);
+                // Сбросим время активации, чтобы избежать повторного начисления
+                autoClickerStartTime = currentTime;
+                localStorage.setItem('autoClickerStartTime', autoClickerStartTime);
             }
             updateUI();
         };
