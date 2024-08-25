@@ -38,7 +38,7 @@
 <body>
     <h1>Управление монетами</h1>
     <div>
-        <img id="coinImage" src="https://nashauk.ru/download/file.php?id=12948&mode=view" alt="Добавить монету">
+        <img id="coinImage" src="YOUR_IMAGE_URL" alt="Добавить монету">
     </div>
     <div id="coinCount">У тебя 0 монет!</div>
     <div id="upgradeSection">
@@ -49,6 +49,7 @@
     <script>
         let coinCount = 0;
         let coinsPerClick = 1; // Количество монет за клик
+        let upgradeCost = 10; // Начальная стоимость улучшения
         const userId = localStorage.getItem('userId') || 'user_' + Math.random().toString(36).substr(2, 9);
         localStorage.setItem('userId', userId);
 
@@ -89,18 +90,20 @@
             .then(data => {
                 console.log('Монеты обновлены на сервере:', data);
             })
-            .catch(error => {console.error('Ошибка при обновлении монет на сервере:', error);
+            .catch(error => {
+                console.error('Ошибка при обновлении монет на сервере:', error);
             });
         };
 
         // Обработчик клика по улучшению
         document.getElementById('upgradeButton').onclick = function() {
-            if (coinCount >= 10) { // Проверка на достаточно ли монет
-                coinCount -= 10; // Тратим 10 монет
+            if (coinCount >= upgradeCost) { // Проверка на достаточно ли монет
+                coinCount -= upgradeCost; // Тратим нужное количество монет
                 coinsPerClick++; // Увеличиваем монеты за клик
+                upgradeCost *= 2; // Увеличиваем стоимость улучшения
                 document.getElementById('coinCount').innerText = `У тебя ${coinCount} монет!`;
                 document.getElementById('upgradeCount').innerText = `Монеты за клик: ${coinsPerClick}`;
-                document.getElementById('upgradeButton').innerText = `Купить улучшение (${10 * Math.pow(2, coinsPerClick - 1)} монет)`; // Меняем текст кнопки
+                document.getElementById('upgradeButton').innerText = `Купить улучшение (${upgradeCost} монет)`; // Меняем текст кнопки
             } else {
                 alert("У тебя недостаточно монет для покупки улучшения!");
             }
